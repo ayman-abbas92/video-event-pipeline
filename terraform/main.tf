@@ -55,7 +55,7 @@ resource "aws_iam_role_policy" "lambda_s3_policy" {
 }
 
 resource "aws_lambda_function" "process_video_events" {
-  function_name    = "process_video_events"
+  function_name    = var.aws_lambda_function_name
   filename         = "../function.zip"
   source_code_hash = filebase64sha256("../function.zip")
   handler          = "lambda_func.lambda_handler"

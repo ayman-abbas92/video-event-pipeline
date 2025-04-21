@@ -21,3 +21,9 @@ variable "aws_bucket_name" {
   type        = string
   default     = "bucket-name"
 }
+
+variable "aws_lambda_function_name" {
+  description = "The name of the Lambda function"
+  type        = string
+  default     = "function-name"
+}

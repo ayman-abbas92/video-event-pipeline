@@ -3,11 +3,11 @@
 This project sets up a simple serverless data pipeline using AWS services to process video impression events and compute basic metrics by campaign and device type.
 
 ## 🚀 Features
-- Upload video event batches to S3 (`input/` folder).
+- Upload video event batches to S3 (`data/input/` folder).
 - Automatically trigger a Lambda function to:
   - Compute total impressions and revenue per campaign.
   - Compute average play duration per device type.
-  - Output results to S3 (`output/` folder).
+  - Output results to S3 (`yyyy/mm/dd/` folder).
 - Infrastructure managed with Terraform.
 
 ---
@@ -42,19 +42,29 @@ video-event-pipeline/
 
 ## 🏗️ Deployment
 
-### 1. Initialize and apply Terraform:
+## 1. Create Terraform variables
+```
+aws_region               = "eu-west-2"
+aws_bucket_name          = "video-event-bucket"
+aws_lambda_function_name = "process_video_events"
+aws_access_key           = "<your-aws-access-key>"
+aws_secret_key           = "<your-aws-secret-key>"
+```
+
+### 2. Initialize and apply Terraform:
 ```bash
 cd terraform
 terraform init
-terraform apply
+terraform apply 
 ```
 
-### 2. Package the Lambda function:
+### 3. Package the Lambda function:
 ```bash
+sudo chmod +x /scripts/package_lambda.sh
 ./scripts/package_lambda.sh
 ```
 
-### 3. Re-apply to upload the function (if needed):
+### 4. Re-apply to upload the function (if needed):
 ```bash
 terraform apply
 ```
@@ -63,7 +73,7 @@ terraform apply
 
 ## 📤 Upload Test Data
 ```bash
-python scripts/upload_to_s3.py video-event-bucket-pipeline input/events.jsonl data/input/events.jsonl
+python3 scripts/upload_to_s3.py video-event-bucket-pipeline data/input/events.txt data/input/events.txt
 ```
 
 ---
@@ -71,7 +81,7 @@ python scripts/upload_to_s3.py video-event-bucket-pipeline input/events.jsonl da
 ## 📈 Output
 The Lambda function writes the transformed results to:
 ```
-s3://video-event-bucket-pipeline/output/events_output.json
+s3://video-event-bucket-aggregated/yyyy/mm/dd/aggregated_stats.json.gz
 ```
 
 ---
@@ -79,9 +89,14 @@ s3://video-event-bucket-pipeline/output/events_output.json
 ## 🧪 Sample Metrics Output
 ```json
 {
-  "total_impressions_per_campaign": {"abc123": 10},
-  "total_revenue_per_campaign": {"abc123": 200.0},
-  "average_play_duration_per_device": {"mobile": 12.4, "desktop": 18.1}
+    "campaigns_stats": {
+        "C1": {"total_price": 1.2, "count": 2}, 
+        "C2": {"total_price": 0.8, "count": 2}
+    }, 
+    "device_stats_avg": {
+        "mobile": {"total_duration": 25, "count": 2, "avg_duration": 12.5}, 
+        "desktop": {"total_duration": 32, "count": 2, "avg_duration": 16.0}
+    }
 }
 ```
 
@@ -90,7 +105,6 @@ s3://video-event-bucket-pipeline/output/events_output.json
 ## 🧠 Extend This Project
 - Add schema validation using AWS Glue or `pydantic`
 - Store metrics in DynamoDB or Redshift
-- Add API Gateway to expose analytics endpoint
 - Build a dashboard using Metabase https://www.metabase.com/
 
 ---

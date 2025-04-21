@@ -1,0 +1,8 @@
+cli-admin_accessKeys.csv
+terraform/prod.tfvars
+venv/
+terraform/.terraform/*
+terraform/.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+function.zip
